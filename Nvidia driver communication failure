@@ -1,0 +1,57 @@
+bluecolorsky
+티스토리 뷰
+IT/딥러닝
+[정보] nvidia-smi 실행 시 couldn't communicate with the NVIDIA driver 오류 해결하기
+지방사는개발자 2020. 9. 11. 23:24
+
+최근 딥러닝이 대세가 되면서 많은 곳에서 딥러닝 기술을 개발하거나 제품에 적용하고 있다. 딥러닝으로 데이터를 입력하여 출력을 얻기 위해서는 많은 컴퓨팅 자원이 필요하며, 특히 GPU가 대량의 병렬 처리에 유리하여 널리 쓰이고 있다. GPU 중에서도 nvidia 사의 GPU가 제일 많이 쓰인다. nvidia GPU에서 작업을 실행시키거나 다른 작업이 동작하는지 확인하기 위해서는 nvidia-smi 명령어를 사용하여야 한다. 해당 명령어는 GPU의 온도, GPU 사용량, GPU 메모리 사용량, 점유하고 있는 프로세스 등 다양한 GPU 정보를 알려주는데, 가끔 문제가 생기면 "couldn't communicate with the NVIDIA driver" 라는 문구가 뜨며 정보를 확인할 수 없는 경우가 존재한다. 이런 경우 어떻게 해결하는지 정리하여 문제 해결에 도움이 되고자 한다.
+couldn't communicate with the NVIDIA driver 오류의 현상
+
+이전에 잘 동작하던 nvidia-smi가 갑자기 동작하지 않는 현상이다. 구체적인 내용은 아래와 같다.
+
+$ nvidia-smi
+NVIDIA-SMI has failed because it couldn't communicate with the NVIDIA driver. Make sure that the latest NVIDIA driver is installed and running.
+
+해당 오류가 발생하는 원인
+
+보통 nvidia GPU 드라이버에 문제가 생기는 경우 해당 오류가 발생한다. 본인의 경우 특히 nvidia 드라이버를 사용하는 딥러닝 작업을 종료하지 않은채로 서버의 전원을 내리거나 시스템을 종료하는 경우 해당 오류가 많이 발생하였다.
+couldn't communicate with the NVIDIA driver 오류 해결 방법
+
+해당 오류가 발생하였을 때는 nvidia GPU 드라이버에 문제가 생긴 상황이기에 nvidia GPU 드라이버를 재설치 하여야 한다. 우선 아래의 명령어로 설치된 nvidia 드라이버 버전을 확인한다. 보통 nvidia-driver-* 의 형태로 버전이 출력된다.
+
+$ apt --installed list | grep nvidia-driver
+
+nvidia-driver-440/bionic-updates,bionic-security,now 440.100-0ubuntu0.18.04.1 amd64 [installed]
+
+설치된 버전을 확인했다면 설치된 nvidia 드리아버를 삭제한다. 삭제한 뒤 apt autoremove 명령어도 추가로 사용하여 드라이버를 확실히 지워야한다.
+
+$ sudo apt remove nvidia-driver-<설치된 버전>
+$ sudo apt autoremove
+
+삭제한 뒤 다시 nvidia 드라이버를 설치한 뒤 재부팅한다. 재부팅 하기 전에는 해당 문제가 해결되지 않는다.
+
+$ sudo apt-get install nvidia-driver-<이전에 설치된 버전>
+$ sudo reboot now
+
+재부팅한 뒤 nvidia-smi를 실행시키면 정상적으로 출력되는 모습을 확인할 수 있다.
+
+$ nvidia-smi
+Fri Sep 11 23:22:24 2020       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 440.100      Driver Version: 440.100      CUDA Version: 10.2     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|===============================+======================+======================|
+|  0%   31C          12W / 180W |    242MiB /  4039MiB |      0%      Default |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                       GPU Memory |
+|  GPU       PID   Type   Process name                             Usage      |
+|=============================================================================|
+|    0      1139      G   /usr/lib/xorg/Xorg                            16MiB |
+|    0      1207      G   /usr/bin/gnome-shell                          50MiB |
+|    0      1468      G   /usr/lib/xorg/Xorg                            75MiB |
+|    0      1612      G   /usr/bin/gnome-shell                          93MiB |
++-----------------------------------------------------------------------------+
