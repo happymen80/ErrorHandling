@@ -1,0 +1,19 @@
+https://blog.kerus.net/2068/wget-%EC%8B%A4%ED%8C%A8%EC%8B%9C-%EB%AC%B4%ED%95%9C-%EB%8B%A4%EC%9A%B4%EB%A1%9C%EB%93%9C-%EC%8B%9C%EB%8F%84/
+
+무언가를 다운로드 하려고 wget을 쓰는데 다운로드 하는 원격서버 상태가 이상해서 몇 초 마다 커넥션이 끊긴다. wget은 재시도를 하긴 하는데 뭔가 재시도 제한이 있는지 wget이 종료된다. 재시도 할 때마다 0% 부터 다시 시작한다는 점에서 이어받기를 할 수 있을까? 찾아봤다.
+
+wget -c
+
+  -c,  --continue                resume getting a partially-downloaded file.
+
+-c 옵션은 다운로드를 이어받을 수 있도록 설정한다. 물론 HTTP웹서버가 Partial Content 대응에 구현되어있지 않으면 수행할 수 없을 것이다.
+
+  -t,  --tries=NUMBER            set number of retries to NUMBER (0 unlimits).
+
+-t 옵션은 재시도의 횟수를 지정한다. 0은 무제한이다. 기본값은 20으로 설정되어있다.
+
+wget -c -t 0 https://....
+
+이렇게 쓰면 무제한 재시도가 가능하다.
+
+wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 0
