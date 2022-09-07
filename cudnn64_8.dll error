@@ -1,0 +1,4 @@
+Could not load dynamic library 'cudnn64_8.dll'; dlerror: cudnn64_8.dll not found
+
+CUDA 설치 경로에 bin 폴더에 cudnn64_8.dll 넣으면 됨
+cudnn64_8.dll 은 https://www.dll-files.com/cudnn64_8.dll.html 여기서 다운로드 가능 (virus여부? 모르겠음)
